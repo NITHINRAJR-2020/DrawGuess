@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CHAT ROOM</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" crossorigin="anonymous"></script>
+
+    <div id="login">
+        <input id="user" type="text" placeholder="ENTER UR USERNAME">
+        <button id="click">ENTER</button>
+    </div>
+
+    
+
+
+    <div id="chat" style="display:none">
+        <canvas id="canvas1" width="400" height="400"></canvas>
+        <ul id="messages"></ul>
+        <input type="text" id="message" placeholder="Type a message...">
+        <button id="exit">EXIT</button>
+        <button id="pen">PEN</button>
+        <button id="eraser">ERASER</button>
+        <button id="clear">CLEAR</button>
+    </div>
+
+    <script>
+
+        const socket = io({ autoConnect: false });
+        let username = "";
+        document.getElementById("click").addEventListener("click", function () {
+            username = document.getElementById("user").value;
+            socket.connect();
+            socket.on("connect", () => {
+                socket.emit("join", username);
+            });
+            document.getElementById("chat").style.display = "block";
+            document.getElementById("login").style.display = "none";
+        });
+     
+    let is_erasing=0;
+    
+
+    document.getElementById("pen").addEventListener("click",function(){
+        is_erasing=0;
+        
+
+    });
+    document.getElementById("eraser").addEventListener("click",function(){
+        is_erasing=1;
+        
+    });
+   
+
+    
+        const canvas=document.getElementById('canvas1');
+        const ctx= canvas.getContext('2d');
+        let drawing = false;
+        let prevX = 0;
+        let prevY = 0;
+        document.getElementById("clear").addEventListener("click",function(){
+               socket.emit("clear")
+        });
+
+        
+        canvas.addEventListener("mousedown", (e) => {
+            drawing = true;
+            prevX = e.offsetX;
+            prevY = e.offsetY;
+        });
+        
+        // Drawing in progress
+        canvas.addEventListener("mousemove", (e) => {
+            if (!drawing) return;
+            let width, color;
+            if(is_erasing){
+                width=10;
+                color='black';
+            }
+            else{
+                width=2;
+                color='white';
+            }
+            const currX = e.offsetX;
+            const currY = e.offsetY;
+        
+            // Draw locally
+            drawLine(prevX, prevY, currX, currY, color, width);
+
+            socket.emit("draw", {
+                  x1: prevX,
+                  y1: prevY,
+                  x2: currX,
+                  y2: currY,
+                  color: color,
+                  width: width
+              });
+            // Send to server
+          
+        
+            prevX = currX;
+            prevY = currY;
+        });
+        
+        // End drawing path
+        canvas.addEventListener("mouseup", () => {
+            drawing = false;
+
+        });
+
+        function drawLine(x1, y1, x2, y2, color, width) {
+                ctx.strokeStyle = color;
+                ctx.lineWidth = width;
+                ctx.beginPath();
+                ctx.moveTo(x1, y1);
+                ctx.lineTo(x2, y2);
+                ctx.stroke();
+                ctx.closePath();
+            }
+        
+
+         
+        document.getElementById("message").addEventListener("keyup", function (event) {
+            if (event.key === "Enter") {
+                const message = document.getElementById("message").value;
+                socket.emit("new", message);
+                document.getElementById("message").value = "";
+            }
+        });
+
+        document.getElementById("exit").addEventListener("click", function () {
+            socket.disconnect();
+            window.location.href = "/";
+        });
+
+        socket.on("chat", function (data) {
+            let ul = document.getElementById("messages");
+            let li = document.createElement("li");
+            if (data.user === username) {
+                li.textContent = data.message;
+                li.classList.add("self");
+            } else {
+                li.textContent = `${data.user}: ${data.message}`;
+            }
+            ul.appendChild(li);
+            ul.scrollTop = ul.scrollHeight;
+        });
+
+        socket.on("admin", function (data) {
+            let ul = document.getElementById("messages");
+            let p = document.createElement("p");
+            p.textContent = data;
+            p.classList.add("admin");
+            ul.appendChild(p);
+            ul.scrollTop = ul.scrollHeight;
+        });
+        
+        socket.on("clear",function(){
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        });
+        socket.on("draw", (data) => {
+        drawLine(data.x1, data.y1, data.x2, data.y2, data.color, data.width)
+        });
+    </script>
+</body>
+</html>

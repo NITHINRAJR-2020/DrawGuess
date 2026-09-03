@@ -1,0 +1,89 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  body.login-page {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(120deg, #5865f2, #404eed);
+    color: #ffffff;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+  }
+  
+  .main {
+    width: 100%;
+    max-width: 400px;
+    background-color: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  }
+  
+  .login-container {
+    text-align: center;
+  }
+  
+  .login-container h2 {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+    color: #ffffff;
+  }
+  
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  input[type="text"],
+  input[type="password"] {
+    padding: 0.75rem 1rem;
+    border-radius: 30px;
+    border: none;
+    outline: none;
+    font-size: 1rem;
+    background-color: #ffffff;
+    color: #404eed;
+  }
+  
+  button[type="submit"] {
+    padding: 0.75rem 1rem;
+    border-radius: 30px;
+    border: none;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+  
+  button[name="login_btn"] {
+    background-color: #ffffff;
+    color: #5865f2;
+  }
+  
+  button[name="signup_btn"] {
+    background-color: #404eed;
+    color: #ffffff;
+  }
+  
+  button[type="submit"]:hover {
+    background-color: #dcdcdc;
+    color: #404eed;
+  }
+  
+  @media (max-width: 480px) {
+    .main {
+      padding: 1.5rem;
+    }
+  
+    .login-container h2 {
+      font-size: 1.6rem;
+    }
+  }
+  
